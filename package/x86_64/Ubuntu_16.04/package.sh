@@ -7,7 +7,7 @@ init_ve() {
   virtualenv -p /usr/bin/python $VE_LOCATION
   # shellcheck disable=SC1090
   source $VE_LOCATION/bin/activate
-  pip install pyinstaller==3.3
+  pip install pyinstaller==3.1
   pip install -r requirements.txt
 }
 

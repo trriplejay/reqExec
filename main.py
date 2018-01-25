@@ -3,6 +3,7 @@ Entrypoint to reqExec
 """
 
 import sys
+import logging
 from config import Config
 from executor import Executor
 
@@ -23,8 +24,19 @@ def main():
 
     config = Config(script_path, job_envs_path)
     ex = Executor(config)
-    ex.execute()
-    sys.exit(ex.exit_code)
 
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.basicConfig(level='dev')
+    _logger = logging.getLogger(__name__)
+
+    _logger.error("<<<<<<<<<<<<<<<<<<<<<<<<<<<ABOUT TO EXECUTE")
+    try:
+        ex.execute()
+    except:
+        _logger.error("<<<<<<<<<<<<<<<<<<<<<<<<<<<HAD AN EXCEPTION")
+
+    _logger.error("<<<<<<<<<<<<<<<<<<<<<<<<<<<DONE EXECUTING")
+    sys.exit(ex.exit_code)
+    _logger.error("<<<<<<<<<<<<<<<<<<<<<<<<<<<AFTER SYS EXIT")
 if __name__ == '__main__':
     main()

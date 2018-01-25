@@ -4,6 +4,7 @@ Executor executes a script, parses consoles and posts console logs
 
 import json
 import subprocess
+import logging
 import threading
 import time
 import traceback
@@ -50,11 +51,16 @@ class Executor(object):
         # Public
         # ------
         self.exit_code = 1
+        logging.getLogger("requests").setLevel(logging.WARNING)
+        logging.basicConfig(level='dev')
+        self._logger = logging.getLogger(__name__)
 
     def execute(self):
         """
         Starts threads to execute the script and flush consoles
         """
+        env = dict(os.environ)
+        self._logger.error(env)
         script_runner_thread = threading.Thread(target=self._script_runner)
         script_runner_thread.start()
 
@@ -65,8 +71,15 @@ class Executor(object):
             self._set_console_flush_timer
         )
         console_flush_timer.start()
+        self._logger.error('------------about to wait for thread')
+        env = dict(os.environ)
+        self._logger.error(env)
+        self._logger.error(env)
+
         script_runner_thread.join()
+        self._logger.error('------------done waiting for thread')
         self._is_executing = False
+        self._logger.error('------------hasErrors is: %s', self._has_errors)
         if self._has_errors:
             self._flush_error_buffer()
         self._flush_console_buffer()
@@ -212,10 +225,15 @@ class Executor(object):
                 'message': line,
                 'timestamp': timestamp,
             }
+
             if parent_id:
+
+            #    self._logger.error('successful message: %s', console_out)
                 self._append_to_console_buffer(console_out)
             else:
+            #    self._logger.error('failed message: %s', line)
                 self._append_to_error_buffer(line)
+
 
         return is_script_success, is_complete
 
@@ -285,6 +303,7 @@ class Executor(object):
         """
         Appends an error into errors buffer after ensuring it is not empty
         """
+        self._logger.error('NEW ERROR BUFFER ITEM: %s', error)
         if not error.strip():
             return
 
